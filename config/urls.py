@@ -6,5 +6,6 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("crops/", include("crops.urls")),
     # Field Management
-    path('fields/', include('fields.urls')),
+    path("fields/", include("fields.urls")),
+    path("activities/", include("activities.urls")),
 ]
