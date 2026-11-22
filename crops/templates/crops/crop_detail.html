@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Crops | AMS{% endblock %}
+
+{% block page_heading %}Crop Management{% endblock %}
+
+{% block content %}
+
+<!-- Your existing page content goes here -->
+
+{% endblock %}
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-success text-white">
+
+        <h4 class="mb-0">Crop Details</h4>
+
+    </div>
+
+    <div class="card-body">
+
+        <h3 class="fw-bold">{{ crop.name }}</h3>
+
+        <hr>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <strong>Variety:</strong>
+                <p>{{ crop.variety|default:"Not specified" }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Category:</strong>
+                <p>{{ crop.category.name }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Field:</strong>
+                <p>{{ crop.field.name }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Field Area:</strong>
+                <p>{{ crop.field.area }} acres</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Soil Type:</strong>
+                <p>{{ crop.field.get_soil_type_display }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Status:</strong>
+                <p>{{ crop.get_status_display }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Planting Date:</strong>
+                <p>{{ crop.planting_date|date:"d M Y" }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <strong>Expected Harvest Date:</strong>
+                <p>{{ crop.expected_harvest_date|date:"d M Y"|default:"Not specified" }}</p>
+            </div>
+
+            <div class="col-12">
+                <strong>Description:</strong>
+                <p>{{ crop.description|default:"No description available." }}</p>
+            </div>
+
+        </div>
+
+
+        <hr>
+
+        <div class="d-flex gap-2">
+
+            <a href="{% url 'crops:edit' crop.pk %}"
+               class="btn btn-success">
+                Edit Crop
+            </a>
+
+            <a href="{% url 'crops:delete' crop.pk %}"
+               class="btn btn-danger">
+                Delete Crop
+            </a>
+
+            <a href="{% url 'crops:list' %}"
+               class="btn btn-secondary">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

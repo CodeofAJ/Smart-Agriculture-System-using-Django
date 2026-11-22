@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Scan Django templates for Tailwind classes */
+@source "../../templates";
+@source "../../accounts/templates";
+@source "../../dashboard/templates";
+@source "../../crops/templates";
+@source "../../fields/templates";
+@source "../../activities/templates";
+@source "../../inventory/templates";
+@source "../../farm_records/templates";
+
+/* DaisyUI configuration */
+@plugin "daisyui" {
+    themes: false;
+}
+
+/* Custom Agriculture Management System theme */
+@plugin "daisyui/theme" {
+    name: "farm";
+    default: true;
+    prefersdark: false;
+    color-scheme: light;
+
+    /* Background colors */
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(97% 0.01 145);
+    --color-base-300: oklch(92% 0.02 145);
+    --color-base-content: oklch(25% 0.03 150);
+
+    /* Primary - Forest Green */
+    --color-primary: oklch(42% 0.12 150);
+    --color-primary-content: oklch(98% 0.01 145);
+
+    /* Secondary - Natural Green */
+    --color-secondary: oklch(55% 0.10 145);
+    --color-secondary-content: oklch(98% 0.01 145);
+
+    /* Accent - Harvest Gold */
+    --color-accent: oklch(75% 0.15 85);
+    --color-accent-content: oklch(25% 0.04 85);
+
+    /* Neutral - Dark Green */
+    --color-neutral: oklch(30% 0.06 150);
+    --color-neutral-content: oklch(98% 0.01 145);
+
+    /* Status colors */
+    --color-info: oklch(65% 0.15 235);
+    --color-info-content: oklch(98% 0.01 235);
+
+    --color-success: oklch(55% 0.15 145);
+    --color-success-content: oklch(98% 0.01 145);
+
+    --color-warning: oklch(78% 0.15 85);
+    --color-warning-content: oklch(25% 0.04 85);
+
+    --color-error: oklch(55% 0.20 25);
+    --color-error-content: oklch(98% 0.01 25);
+
+    /* Component shapes */
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.75rem;
+
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+}

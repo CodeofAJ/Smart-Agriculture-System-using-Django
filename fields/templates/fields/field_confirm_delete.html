@@ -1,0 +1,88 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Delete Field | AMS{% endblock %}
+
+{% block page_heading %}Delete Field{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+
+    <div class="card bg-base-100 border border-error/30 shadow-md">
+
+        <div class="card-body items-center text-center space-y-4">
+
+            <!-- Warning Icon -->
+            <div class="rounded-full bg-error/10 p-5">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-12 w-12 text-error"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="1.5">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 9v4m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                </svg>
+            </div>
+
+            <h2 class="text-2xl font-bold">
+                Delete This Field?
+            </h2>
+
+            <p class="text-base-content/70">
+                Are you sure you want to delete
+                <strong class="text-base-content">{{ field.name }}</strong>?
+            </p>
+
+            <div class="alert alert-warning text-left">
+                <span>
+                    This action cannot be undone. Fields with assigned crops
+                    cannot be deleted.
+                </span>
+            </div>
+
+            <!-- Field Summary -->
+            <div class="w-full rounded-lg bg-base-200 p-4 text-left space-y-2">
+
+                <div class="flex justify-between gap-4">
+                    <span class="text-base-content/60">Field Name</span>
+                    <strong>{{ field.name }}</strong>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <span class="text-base-content/60">Location</span>
+                    <strong>{{ field.location|default:"Not specified" }}</strong>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <span class="text-base-content/60">Area</span>
+                    <strong>{{ field.area }} acres</strong>
+                </div>
+
+                <div class="flex justify-between gap-4">
+                    <span class="text-base-content/60">Assigned Crops</span>
+                    <strong>{{ field.crops.count }}</strong>
+                </div>
+
+            </div>
+
+            <!-- Confirmation Form -->
+            <form method="POST" class="flex flex-wrap justify-center gap-3 w-full pt-3">
+                {% csrf_token %}
+
+                <a href="{% url 'fields:detail' field.pk %}"
+                   class="btn btn-ghost">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-error">
+                    Confirm Delete
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

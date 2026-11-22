@@ -1,0 +1,275 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Crop Management | AMS{% endblock %}
+
+{% block page_heading %}Crop Management{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+            <h2 class="text-2xl font-bold text-base-content">
+                Crop Management
+            </h2>
+
+            <p class="text-base-content/60 mt-1">
+                Manage your agricultural crops
+            </p>
+        </div>
+
+        <a href="{% url 'crops:add' %}" class="btn btn-primary">
+            <span class="text-lg">+</span>
+            Add Crop
+        </a>
+
+    </div>
+
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+
+        <div class="card-body">
+
+            <form method="get"
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+
+                <!-- Search -->
+                <div class="form-control lg:col-span-5">
+                    <label for="crop-search" class="label">
+                        <span class="label-text font-medium">Search Crops</span>
+                    </label>
+
+                    <input
+                        id="crop-search"
+                        type="text"
+                        name="q"
+                        class="input input-bordered w-full"
+                        placeholder="Search crop name or variety..."
+                        value="{{ search }}"
+                    >
+                </div>
+
+
+                <!-- Category -->
+                <div class="form-control lg:col-span-2">
+                    <label for="category-filter" class="label">
+                        <span class="label-text font-medium">Category</span>
+                    </label>
+
+                    <select
+                        id="category-filter"
+                        name="category"
+                        class="select select-bordered w-full"
+                    >
+                        <option value="">All Categories</option>
+
+                        {% for category in categories %}
+                            <option
+                                value="{{ category.id }}"
+                                {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}
+                            >
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <!-- Status -->
+                <div class="form-control lg:col-span-2">
+                    <label for="status-filter" class="label">
+                        <span class="label-text font-medium">Status</span>
+                    </label>
+
+                    <select
+                        id="status-filter"
+                        name="status"
+                        class="select select-bordered w-full"
+                    >
+                        <option value="">All Statuses</option>
+
+                        <option value="PLANNED"
+                            {% if selected_status == "PLANNED" %}selected{% endif %}>
+                            Planned
+                        </option>
+
+                        <option value="GROWING"
+                            {% if selected_status == "GROWING" %}selected{% endif %}>
+                            Growing
+                        </option>
+
+                        <option value="HARVESTED"
+                            {% if selected_status == "HARVESTED" %}selected{% endif %}>
+                            Harvested
+                        </option>
+
+                        <option value="FAILED"
+                            {% if selected_status == "FAILED" %}selected{% endif %}>
+                            Failed
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <!-- Buttons -->
+                <div class="flex gap-2 lg:col-span-3">
+
+                    <button type="submit" class="btn btn-primary flex-1">
+                        Search
+                    </button>
+
+                    <a href="{% url 'crops:list' %}"
+                       class="btn btn-outline flex-1">
+                        Reset
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- Crop Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+
+        <div class="card-body p-0">
+
+            <div class="flex items-center justify-between px-6 pt-5">
+                <h3 class="font-bold text-lg">
+                    Crop Records
+                </h3>
+
+                <span class="badge badge-success badge-outline">
+                    {{ crops|length }} Crops
+                </span>
+            </div>
+
+            <div class="overflow-x-auto p-4">
+
+                <table class="table table-zebra table-hover w-full">
+
+                    <thead>
+                        <tr class="text-base-content/70">
+                            <th>#</th>
+                            <th>Crop</th>
+                            <th>Category</th>
+                            <th>Field</th>
+                            <th>Planting Date</th>
+                            <th>Expected Harvest</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for crop in crops %}
+
+                            <tr>
+
+                                <td class="font-medium">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td>
+                                    <div class="font-semibold text-base-content">
+                                        {{ crop.name }}
+                                    </div>
+
+                                    <div class="text-sm text-base-content/60">
+                                        {{ crop.variety|default:"No variety" }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ crop.category.name }}
+                                </td>
+
+                                <td>
+                                    {{ crop.field.name }}
+                                </td>
+
+                                <td class="whitespace-nowrap">
+                                    {{ crop.planting_date|date:"d M Y" }}
+                                </td>
+
+                                <td class="whitespace-nowrap">
+                                    {{ crop.expected_harvest_date|date:"d M Y"|default:"-" }}
+                                </td>
+
+                                <td>
+                                    {% if crop.status == 'GROWING' %}
+                                        <span class="badge badge-success">Growing</span>
+
+                                    {% elif crop.status == 'PLANNED' %}
+                                        <span class="badge badge-info">Planned</span>
+
+                                    {% elif crop.status == 'HARVESTED' %}
+                                        <span class="badge badge-primary">Harvested</span>
+
+                                    {% else %}
+                                        <span class="badge badge-error">Failed</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="flex justify-center items-center gap-2">
+
+                                        <a href="{% url 'crops:detail' crop.pk %}"
+                                           class="btn btn-xs btn-outline btn-info">
+                                            View
+                                        </a>
+
+                                        <a href="{% url 'crops:edit' crop.pk %}"
+                                           class="btn btn-xs btn-outline btn-success">
+                                            Edit
+                                        </a>
+
+                                        <a href="{% url 'crops:delete' crop.pk %}"
+                                           class="btn btn-xs btn-outline btn-error">
+                                            Delete
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="8" class="text-center py-10">
+                                    <p class="text-base-content/60">
+                                        No crops found.
+                                    </p>
+
+                                    <a href="{% url 'crops:add' %}"
+                                       class="btn btn-sm btn-primary mt-3">
+                                        Add Your First Crop
+                                    </a>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

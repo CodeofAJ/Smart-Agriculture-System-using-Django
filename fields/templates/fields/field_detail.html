@@ -1,0 +1,213 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ field.name }} | AMS{% endblock %}
+
+{% block page_heading %}Field Details{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+        <div>
+            <h2 class="text-2xl font-bold text-base-content">
+                {{ field.name }}
+            </h2>
+            <p class="text-base-content/60 mt-1">
+                Field information and crop assignments
+            </p>
+        </div>
+
+        <div class="flex gap-2">
+            <a href="{% url 'fields:list' %}" class="btn btn-ghost">
+                Back
+            </a>
+
+            <a href="{% url 'fields:edit' field.pk %}"
+               class="btn btn-primary">
+                Edit Field
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Field Information -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Field Area</p>
+                <h3 class="text-2xl font-bold text-primary">
+                    {{ field.area }}
+                </h3>
+                <p class="text-sm text-base-content/60">Acres</p>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Soil Type</p>
+                <h3 class="text-xl font-bold">
+                    {{ field.get_soil_type_display }}
+                </h3>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Assigned Crops</p>
+                <h3 class="text-2xl font-bold">
+                    {{ field.crops.count }}
+                </h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- General Information -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body">
+
+            <h3 class="card-title text-lg mb-3">
+                General Information
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div>
+                    <p class="text-sm text-base-content/60">Field Name</p>
+                    <p class="font-semibold">{{ field.name }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Location</p>
+                    <p class="font-semibold">
+                        {{ field.location|default:"Not specified" }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Area</p>
+                    <p class="font-semibold">{{ field.area }} acres</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Soil Type</p>
+                    <p class="font-semibold">
+                        {{ field.get_soil_type_display }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Created At</p>
+                    <p class="font-semibold">
+                        {{ field.created_at|date:"d M Y, h:i A" }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <p class="text-sm text-base-content/60 mb-2">Description</p>
+                <p class="whitespace-pre-line">
+                    {{ field.description|default:"No description provided." }}
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Assigned Crops -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body">
+
+            <div class="flex justify-between items-center">
+                <h3 class="card-title text-lg">Assigned Crops</h3>
+
+                <span class="badge badge-success">
+                    {{ field.crops.count }} Crops
+                </span>
+            </div>
+
+            {% with crops=field.crops.all %}
+                {% if crops %}
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+
+                            <thead>
+                                <tr>
+                                    <th>Crop Name</th>
+                                    <th>Category</th>
+                                    <th>Planting Date</th>
+                                    <th>Expected Harvest</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for crop in crops %}
+                                    <tr>
+                                        <td class="font-semibold">
+                                            {{ crop.name }}
+                                        </td>
+
+                                        <td>{{ crop.category.name }}</td>
+
+                                        <td>{{ crop.planting_date|date:"d M Y" }}</td>
+
+                                        <td>
+                                            {{ crop.expected_harvest_date|date:"d M Y"|default:"-" }}
+                                        </td>
+
+                                        <td>
+                                            {% if crop.status == 'GROWING' %}
+                                                <span class="badge badge-success">Growing</span>
+                                            {% elif crop.status == 'HARVESTED' %}
+                                                <span class="badge badge-info">Harvested</span>
+                                            {% elif crop.status == 'FAILED' %}
+                                                <span class="badge badge-error">Failed</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Planned</span>
+                                            {% endif %}
+                                        </td>
+
+                                        <td>
+                                            <a href="{% url 'crops:detail' crop.pk %}"
+                                               class="btn btn-xs btn-outline btn-primary">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                {% else %}
+                    <div class="text-center py-10">
+                        <p class="text-base-content/60">
+                            No crops have been assigned to this field yet.
+                        </p>
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+        </div>
+    </div>
+
+    <!-- Delete Action -->
+    <div class="flex justify-end">
+        <a href="{% url 'fields:delete' field.pk %}"
+           class="btn btn-outline btn-error">
+            Delete Field
+        </a>
+    </div>
+
+</div>
+{% endblock %}

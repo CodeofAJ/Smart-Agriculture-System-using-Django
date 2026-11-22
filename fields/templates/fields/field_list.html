@@ -1,0 +1,226 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Fields | AMS{% endblock %}
+{% block page_heading %}Field Management{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+        <div>
+            <h2 class="text-2xl font-bold text-base-content">
+                Farm Fields
+            </h2>
+            <p class="mt-1 text-sm text-base-content/60">
+                Manage your farm land and field information.
+            </p>
+        </div>
+
+        <a href="{% url 'fields:add' %}" class="btn btn-primary">
+            + Add New Field
+        </a>
+
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card border border-base-300 bg-base-100 shadow-sm">
+        <div class="card-body">
+
+            <form method="GET" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Search Fields</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ search }}"
+                        placeholder="Search name or location..."
+                        class="input input-bordered w-full">
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Soil Type</span>
+                    </label>
+
+                    <select name="soil_type" class="select select-bordered w-full">
+                        <option value="">All Soil Types</option>
+
+                        {% for value, label in soil_types %}
+                            <option value="{{ value }}"
+                                {% if selected_soil_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        Search
+                    </button>
+
+                    <a href="{% url 'fields:list' %}" class="btn btn-ghost">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Field Table -->
+    <div class="card border border-base-300 bg-base-100 shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="flex items-center justify-between border-b border-base-300 px-6 py-4">
+                <h3 class="font-bold text-lg">Field Records</h3>
+
+                <span class="badge badge-success badge-outline">
+                    {{ page_obj.paginator.count }} Fields
+                </span>
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="table table-zebra w-full">
+
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Location</th>
+                            <th>Area (Acres)</th>
+                            <th>Soil Type</th>
+                            <th>Assigned Crops</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for field in fields %}
+
+                            <tr>
+
+                                <td class="font-semibold">
+                                    {{ field.name }}
+                                </td>
+
+                                <td>
+                                    {{ field.location|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {{ field.area }}
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-outline">
+                                        {{ field.get_soil_type_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ field.crops.count }}
+                                </td>
+
+                                <td>
+                                    <div class="flex justify-end gap-2">
+
+                                        <a href="{% url 'fields:detail' field.pk %}"
+                                           class="btn btn-sm btn-ghost">
+                                            View
+                                        </a>
+
+                                        <a href="{% url 'fields:edit' field.pk %}"
+                                           class="btn btn-sm btn-outline btn-primary">
+                                            Edit
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="6" class="py-12 text-center">
+
+                                    <div class="space-y-2">
+                                        <p class="text-3xl">🌱</p>
+
+                                        <p class="font-semibold">
+                                            No fields found
+                                        </p>
+
+                                        <p class="text-sm text-base-content/60">
+                                            Add your first farm field to get started.
+                                        </p>
+
+                                        <a href="{% url 'fields:add' %}"
+                                           class="btn btn-primary btn-sm mt-3">
+                                            Add Field
+                                        </a>
+                                    </div>
+
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+
+                <div class="flex flex-col justify-between gap-3 border-t border-base-300 px-6 py-4 sm:flex-row sm:items-center">
+
+                    <p class="text-sm text-base-content/60">
+                        Showing page {{ page_obj.number }}
+                        of {{ page_obj.paginator.num_pages }}
+                    </p>
+
+                    <div class="join">
+
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}&q={{ search|urlencode }}&soil_type={{ selected_soil_type|urlencode }}"
+                               class="btn btn-sm join-item">
+                                Previous
+                            </a>
+                        {% endif %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}&q={{ search|urlencode }}&soil_type={{ selected_soil_type|urlencode }}"
+                               class="btn btn-sm join-item">
+                                Next
+                            </a>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,297 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="farm">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}AMS | Agriculture Management System{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-base-200 text-base-content">
+
+    {% if request.user.is_authenticated %}
+
+        <!-- Authenticated Dashboard Layout -->
+        <div class="drawer lg:drawer-open">
+
+            <input id="main-drawer" type="checkbox" class="drawer-toggle">
+
+            <div class="drawer-content flex min-h-screen flex-col">
+
+                <!-- Top Navbar -->
+                <header class="navbar sticky top-0 z-30 border-b border-base-300 bg-base-100 px-4 shadow-sm lg:px-8">
+
+                    <div class="flex-none lg:hidden">
+                        <label for="main-drawer"
+                               class="btn btn-square btn-ghost drawer-button"
+                               aria-label="Open sidebar">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-6 w-6"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+
+                        </label>
+                    </div>
+
+                    <!-- Page Heading -->
+                    <div class="flex-1">
+                        <div>
+                            <h1 class="text-lg font-bold text-primary lg:text-xl">
+                                {% block page_heading %}Dashboard{% endblock %}
+                            </h1>
+
+                            <p class="hidden text-xs text-base-content/60 sm:block">
+                                Agriculture Management System
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- User Dropdown -->
+                    <div class="flex-none">
+
+                        <div class="dropdown dropdown-end">
+
+                            <div tabindex="0"
+                                 role="button"
+                                 class="btn btn-ghost flex items-center gap-2">
+
+                                <div class="avatar placeholder">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content">
+                                        <span class="font-bold">
+                                            {{ request.user.username|first|upper }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="hidden text-left sm:block">
+                                    <p class="text-sm font-semibold">
+                                        {{ request.user.username }}
+                                    </p>
+
+                                    <p class="text-xs text-base-content/60">
+                                        Administrator
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <ul tabindex="0"
+                                class="menu dropdown-content z-50 mt-3 w-52 rounded-box bg-base-100 p-2 shadow-lg">
+
+                                <li class="menu-title">Account</li>
+
+                                <li>
+                                    <span class="cursor-default">
+                                        {{ request.user.username }}
+                                    </span>
+                                </li>
+
+                                <div class="divider my-1"></div>
+
+                                <li>
+                                    <form method="POST" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-error">
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </header>
+
+                <!-- Main Content Area -->
+                <main class="w-full flex-1 p-4 sm:p-6 lg:p-8">
+
+    {% else %}
+
+        <!-- Guest / Login Layout -->
+        <main class="flex min-h-screen items-center justify-center bg-base-200 p-4">
+
+            <div class="w-full max-w-md">
+
+    {% endif %}
+
+
+    <!-- Django Messages -->
+    {% if messages %}
+        <div class="mb-6 space-y-3">
+
+            {% for message in messages %}
+
+                <div class="alert
+                    {% if message.tags == 'success' %}alert-success
+                    {% elif message.tags == 'error' %}alert-error
+                    {% elif message.tags == 'warning' %}alert-warning
+                    {% else %}alert-info{% endif %}
+                    shadow-sm">
+
+                    <span>{{ message }}</span>
+
+                    <button type="button"
+                            class="btn btn-sm btn-ghost"
+                            onclick="this.parentElement.remove()">
+                        ✕
+                    </button>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+    {% endif %}
+
+
+    <!-- Single Content Block -->
+    {% block content %}
+    {% endblock %}
+
+
+    {% if request.user.is_authenticated %}
+
+                </main>
+
+                <!-- Footer -->
+                <footer class="border-t border-base-300 bg-base-100 px-6 py-4 text-center text-xs text-base-content/60">
+                    © {% now "Y" %} Agriculture Management System. All rights reserved.
+                </footer>
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="drawer-side z-40">
+
+                <label for="main-drawer"
+                       aria-label="Close sidebar"
+                       class="drawer-overlay">
+                </label>
+
+                <aside class="flex min-h-full w-72 flex-col bg-neutral text-neutral-content">
+
+                    <!-- Brand -->
+                    <div class="flex h-20 items-center gap-3 border-b border-white/10 px-6">
+
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-2xl">
+                            🌱
+                        </div>
+
+                        <div>
+                            <h2 class="text-lg font-bold tracking-wide">
+                                Farm<span class="text-green-300">Manage</span>
+                            </h2>
+
+                            <p class="text-xs text-white/50">
+                                Agriculture Management
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="flex-1 px-4 py-6">
+
+                        <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-widest text-white/40">
+                            Main Menu
+                        </p>
+
+                        <ul class="menu w-full gap-2 p-0">
+
+                            <li>
+                                <a href="{% url 'crops:list' %}"
+                                   class="{% if request.resolver_match.app_name == 'crops' %}active bg-primary text-primary-content{% else %}text-white/80 hover:bg-white/10 hover:text-white{% endif %}">
+
+                                    <span>🌾</span>
+                                    <span>Crop Management</span>
+
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{% url 'fields:list' %}"
+                                   class="{% if request.resolver_match.app_name == 'fields' %}active bg-primary text-primary-content{% else %}text-white/80 hover:bg-white/10 hover:text-white{% endif %}">
+
+                                    <span>🌿</span>
+                                    <span>Field Management</span>
+
+                                </a>
+                            </li>
+
+                        </ul>
+
+                        <div class="divider before:bg-white/10 after:bg-white/10"></div>
+
+                        <p class="mb-3 px-3 text-xs font-semibold uppercase tracking-widest text-white/40">
+                            Account
+                        </p>
+
+                        <ul class="menu w-full gap-2 p-0">
+
+                            <li>
+                                <form method="POST" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="w-full text-left text-white/80 hover:bg-red-500/20 hover:text-red-300">
+                                        <span>↪</span>
+                                        Logout
+                                    </button>
+
+                                </form>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <!-- Sidebar Footer -->
+                    <div class="border-t border-white/10 p-5">
+
+                        <div class="rounded-xl bg-white/5 p-4">
+                            <p class="text-sm font-semibold text-green-300">
+                                🌱 Growing Together
+                            </p>
+
+                            <p class="mt-1 text-xs leading-relaxed text-white/50">
+                                Manage your farm operations efficiently.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+            </div>
+        </main>
+
+    {% endif %}
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

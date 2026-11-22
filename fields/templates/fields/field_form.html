@@ -1,0 +1,134 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Field{% else %}Add Field{% endif %} | AMS
+{% endblock %}
+
+{% block page_heading %}
+    {% if object %}Edit Field{% else %}Add New Field{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Page Header -->
+    <div>
+        <h2 class="text-2xl font-bold text-base-content">
+            {% if object %}Update Field Details{% else %}Register a New Field{% endif %}
+        </h2>
+        <p class="text-base-content/60 mt-1">
+            {% if object %}
+                Update the information for this agricultural field.
+            {% else %}
+                Enter the details of your farm field below.
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body">
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        <span>{{ form.non_field_errors }}</span>
+                    </div>
+                {% endif %}
+
+                <!-- Field Name -->
+                <div class="form-control">
+                    <label for="{{ form.name.id_for_label }}" class="label">
+                        <span class="label-text font-semibold">Field Name *</span>
+                    </label>
+
+                    {{ form.name }}
+
+                    {% for error in form.name.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Location -->
+                <div class="form-control">
+                    <label for="{{ form.location.id_for_label }}" class="label">
+                        <span class="label-text font-semibold">Location</span>
+                    </label>
+
+                    {{ form.location }}
+
+                    {% for error in form.location.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Area and Soil Type -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <div class="form-control">
+                        <label for="{{ form.area.id_for_label }}" class="label">
+                            <span class="label-text font-semibold">Area (Acres) *</span>
+                        </label>
+
+                        {{ form.area }}
+
+                        {% for error in form.area.errors %}
+                            <p class="text-error text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-control">
+                        <label for="{{ form.soil_type.id_for_label }}" class="label">
+                            <span class="label-text font-semibold">Soil Type *</span>
+                        </label>
+
+                        {{ form.soil_type }}
+
+                        {% for error in form.soil_type.errors %}
+                            <p class="text-error text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                <!-- Description -->
+                <div class="form-control">
+                    <label for="{{ form.description.id_for_label }}" class="label">
+                        <span class="label-text font-semibold">Description</span>
+                    </label>
+
+                    {{ form.description }}
+
+                    {% for error in form.description.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-wrap justify-end gap-3 pt-4 border-t border-base-300">
+
+                    <a href="{% url 'fields:list' %}"
+                       class="btn btn-ghost">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        {% if object %}
+                            Update Field
+                        {% else %}
+                            Save Field
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
