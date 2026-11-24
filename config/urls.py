@@ -8,4 +8,5 @@ urlpatterns = [
     # Field Management
     path("fields/", include("fields.urls")),
     path("activities/", include("activities.urls")),
+    path('inventory/', include('inventory.urls')),
 ]
