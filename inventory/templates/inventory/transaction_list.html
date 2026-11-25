@@ -1,0 +1,324 @@
+
+{% extends "base.html" %}
+
+{% block title %}Transaction History | Inventory{% endblock %}
+
+{% block page_heading %}
+    {% if is_item_history %}
+        {{ item.name }} - Transaction History
+    {% else %}
+        Inventory Transaction History
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold">Transaction History</h2>
+            <p class="text-base-content/60 mt-1">
+                Monitor all inventory stock movements.
+            </p>
+        </div>
+
+        <a href="{% url 'inventory:list' %}" class="btn btn-outline">
+            Back to Inventory
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Stock-In Transactions</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-success">
+                        {{ total_stock_in }}
+                    </h3>
+                    <span class="badge badge-success badge-lg">Stock In</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Stock-Out Transactions</p>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-bold text-error">
+                        {{ total_stock_out }}
+                    </h3>
+                    <span class="badge badge-error badge-lg">Stock Out</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Filters -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body">
+
+            <h3 class="font-semibold text-lg">Search and Filters</h3>
+
+            <form method="get" class="space-y-4">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+
+                    <!-- Search -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Search</span>
+                        </label>
+
+                        <input
+                            type="text"
+                            name="search"
+                            value="{{ search_query }}"
+                            placeholder="Item, reference, notes..."
+                            class="input input-bordered w-full"
+                        >
+                    </div>
+
+                    <!-- Transaction Type -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Transaction Type</span>
+                        </label>
+
+                        <select name="transaction_type"
+                                class="select select-bordered w-full">
+
+                            <option value="">All Transactions</option>
+
+                            {% for value, label in transaction_types %}
+                                <option value="{{ value }}"
+                                    {% if selected_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <!-- Inventory Item -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">Inventory Item</span>
+                        </label>
+
+                        <select name="inventory"
+                                class="select select-bordered w-full">
+
+                            <option value="">All Items</option>
+
+                            {% for inventory_item in inventory_items %}
+                                <option value="{{ inventory_item.pk }}"
+                                    {% if selected_inventory == inventory_item.pk|stringformat:"s" %}selected{% endif %}>
+                                    {{ inventory_item.name }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+
+                    <!-- Date From -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">From Date</span>
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date_from"
+                            value="{{ date_from }}"
+                            class="input input-bordered w-full"
+                        >
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">To Date</span>
+                        </label>
+
+                        <input
+                            type="date"
+                            name="date_to"
+                            value="{{ date_to }}"
+                            class="input input-bordered w-full"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="flex flex-wrap gap-2 justify-end">
+                    <a href="{% if is_item_history %}{% url 'inventory:item_transactions' item.pk %}{% else %}{% url 'inventory:transactions' %}{% endif %}"
+                       class="btn btn-ghost">
+                        Reset
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        Apply Filters
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-0">
+
+            <div class="p-5 border-b border-base-300">
+                <h3 class="font-semibold text-lg">Transaction Records</h3>
+                <p class="text-sm text-base-content/60">
+                    {{ page_obj.paginator.count }} matching records
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Inventory Item</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Previous Stock</th>
+                            <th>New Stock</th>
+                            <th>Reference</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for transaction in transactions %}
+
+                            <tr>
+
+                                <td class="whitespace-nowrap">
+                                    {{ transaction.transaction_date|date:"d M Y" }}
+                                </td>
+
+                                <td class="font-medium">
+                                    {{ transaction.inventory.name }}
+                                </td>
+
+                                <td>
+                                    {% if transaction.transaction_type == 'STOCK_IN' %}
+                                        <span class="badge badge-success">
+                                            Stock In
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-error">
+                                            Stock Out
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="font-semibold whitespace-nowrap">
+                                    {% if transaction.transaction_type == 'STOCK_IN' %}
+                                        <span class="text-success">+</span>
+                                    {% else %}
+                                        <span class="text-error">−</span>
+                                    {% endif %}
+
+                                    {{ transaction.quantity|floatformat:2 }}
+                                    {{ transaction.inventory.unit }}
+                                </td>
+
+                                <td>
+                                    {{ transaction.previous_quantity|floatformat:2 }}
+                                    {{ transaction.inventory.unit }}
+                                </td>
+
+                                <td class="font-semibold">
+                                    {{ transaction.new_quantity|floatformat:2 }}
+                                    {{ transaction.inventory.unit }}
+                                </td>
+
+                                <td>
+                                    {{ transaction.reference|default:"—" }}
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'inventory:detail' transaction.inventory.pk %}"
+                                       class="btn btn-sm btn-ghost btn-primary">
+                                        View Item
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+                                <td colspan="8" class="text-center py-12">
+                                    <div class="flex flex-col items-center gap-2">
+                                        <span class="text-base-content/40">
+                                            No transactions found.
+                                        </span>
+                                        <p class="text-sm text-base-content/50">
+                                            Try changing your search or filter criteria.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-5 border-t border-base-300">
+
+                    <p class="text-sm text-base-content/60">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </p>
+
+                    <div class="join">
+
+                        {% if page_obj.has_previous %}
+                            <a class="join-item btn btn-sm"
+                               href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value|urlencode }}{% endif %}{% endfor %}">
+                                First
+                            </a>
+
+                            <a class="join-item btn btn-sm"
+                               href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value|urlencode }}{% endif %}{% endfor %}">
+                                Previous
+                            </a>
+                        {% endif %}
+
+                        {% if page_obj.has_next %}
+                            <a class="join-item btn btn-sm"
+                               href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value|urlencode }}{% endif %}{% endfor %}">
+                                Next
+                            </a>
+
+                            <a class="join-item btn btn-sm"
+                               href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value|urlencode }}{% endif %}{% endfor %}">
+                                Last
+                            </a>
+                        {% endif %}
+
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

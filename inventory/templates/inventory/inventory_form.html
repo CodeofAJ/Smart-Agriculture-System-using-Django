@@ -1,0 +1,347 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}Edit Inventory{% else %}Add Inventory{% endif %} | Smart Agriculture
+{% endblock %}
+
+{% block page_heading %}
+    {% if object %}Edit Inventory{% else %}Add Inventory{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">
+                {% if object %}
+                    Edit Inventory Item
+                {% else %}
+                    Add Inventory Item
+                {% endif %}
+            </h1>
+
+            <p class="text-sm text-base-content/60 mt-1">
+                {% if object %}
+                    Update the details of your existing inventory item.
+                {% else %}
+                    Register a new item in your farm inventory.
+                {% endif %}
+            </p>
+        </div>
+
+        <a href="{% url 'inventory:list' %}"
+           class="btn btn-ghost border border-base-300 gap-2">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-4 w-4"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor"
+                 stroke-width="2">
+
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19l-7-7 7-7" />
+
+            </svg>
+
+            Back to Inventory
+        </a>
+
+    </div>
+
+
+    <!-- Inventory Form -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+
+        <div class="card-body p-5 sm:p-7">
+
+            <form method="POST" class="space-y-6">
+
+                {% csrf_token %}
+
+
+                <!-- General Errors -->
+                {% if form.non_field_errors %}
+
+                    <div class="alert alert-error">
+
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+                <!-- Basic Information -->
+                <div>
+
+                    <h2 class="text-lg font-semibold">
+                        Basic Information
+                    </h2>
+
+                    <p class="text-sm text-base-content/60 mt-1">
+                        Enter the inventory item's basic details.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+
+
+                        <!-- Item Name -->
+                        <div class="form-control">
+
+                            <label for="{{ form.name.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Item Name <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.name }}
+
+                            {% for error in form.name.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- Item Type -->
+                        <div class="form-control">
+
+                            <label for="{{ form.item_type.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Item Type <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.item_type }}
+
+                            {% for error in form.item_type.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- Description -->
+                        <div class="form-control md:col-span-2">
+
+                            <label for="{{ form.description.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Description
+                                </span>
+
+                            </label>
+
+                            {{ form.description }}
+
+                            {% for error in form.description.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="divider"></div>
+
+
+                <!-- Stock Information -->
+                <div>
+
+                    <h2 class="text-lg font-semibold">
+                        Stock Information
+                    </h2>
+
+                    <p class="text-sm text-base-content/60 mt-1">
+                        Enter the current quantity and minimum stock level.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+
+
+                        <!-- Quantity -->
+                        <div class="form-control">
+
+                            <label for="{{ form.quantity.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Current Quantity <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.quantity }}
+
+                            {% for error in form.quantity.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- Unit -->
+                        <div class="form-control">
+
+                            <label for="{{ form.unit.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Unit <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.unit }}
+
+                            {% for error in form.unit.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- Minimum Quantity -->
+                        <div class="form-control">
+
+                            <label for="{{ form.minimum_quantity.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Minimum Stock Level <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.minimum_quantity }}
+
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/50">
+                                    Low-stock warning threshold.
+                                </span>
+                            </label>
+
+                            {% for error in form.minimum_quantity.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- Unit Price -->
+                        <div class="form-control">
+
+                            <label for="{{ form.unit_price.id_for_label }}"
+                                   class="label">
+
+                                <span class="label-text font-medium">
+                                    Unit Price (₹) <span class="text-error">*</span>
+                                </span>
+
+                            </label>
+
+                            {{ form.unit_price }}
+
+                            {% for error in form.unit_price.errors %}
+                                <p class="text-error text-xs mt-1">
+                                    {{ error }}
+                                </p>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="divider"></div>
+
+
+                <!-- Form Actions -->
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+
+                    <a href="{% url 'inventory:list' %}"
+                       class="btn btn-ghost border border-base-300">
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit" class="btn btn-primary gap-2">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-5 w-5"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            {% if object %}
+
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="M5 13l4 4L19 7" />
+
+                            {% else %}
+
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      d="M12 4v16m8-8H4" />
+
+                            {% endif %}
+
+                        </svg>
+
+                        {% if object %}
+                            Update Inventory
+                        {% else %}
+                            Save Inventory
+                        {% endif %}
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,192 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_stock_in %}Stock In{% else %}Stock Out{% endif %} | Inventory
+{% endblock %}
+
+{% block page_heading %}
+    {% if is_stock_in %}Stock In{% else %}Stock Out{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex items-center gap-3">
+        <div class="p-3 rounded-xl
+            {% if is_stock_in %}bg-success/10 text-success{% else %}bg-error/10 text-error{% endif %}">
+            {% if is_stock_in %}
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-7 w-7" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4v16m8-8H4"/>
+                </svg>
+            {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-7 w-7" fill="none"
+                     viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M20 12H4"/>
+                </svg>
+            {% endif %}
+        </div>
+
+        <div>
+            <h2 class="text-2xl font-bold">
+                {% if is_stock_in %}Add Stock{% else %}Remove Stock{% endif %}
+            </h2>
+            <p class="text-base-content/60">
+                {% if is_stock_in %}
+                    Record newly purchased or received inventory.
+                {% else %}
+                    Record inventory consumed or removed from stock.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Inventory Information -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+            <h3 class="font-semibold text-lg">Inventory Information</h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+
+                <div>
+                    <p class="text-sm text-base-content/60">Item Name</p>
+                    <p class="font-semibold">{{ item.name }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Item Type</p>
+                    <p class="font-semibold">{{ item.get_item_type_display }}</p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Available Stock</p>
+                    <p class="text-xl font-bold text-primary">
+                        {{ item.quantity|floatformat:2 }} {{ item.unit }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Minimum Stock</p>
+                    <p class="font-semibold">
+                        {{ item.minimum_quantity|floatformat:2 }} {{ item.unit }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Form -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+
+            <h3 class="card-title">
+                Transaction Details
+            </h3>
+
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Quantity -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Quantity ({{ item.unit }})
+                        </span>
+                    </label>
+
+                    {{ form.quantity }}
+
+                    {% for error in form.quantity.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Transaction Date -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Transaction Date
+                        </span>
+                    </label>
+
+                    {{ form.transaction_date }}
+
+                    {% for error in form.transaction_date.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Reference -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Reference Number
+                        </span>
+                    </label>
+
+                    {{ form.reference }}
+
+                    {% for error in form.reference.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Notes -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">
+                            Notes
+                        </span>
+                    </label>
+
+                    {{ form.notes }}
+
+                    {% for error in form.notes.errors %}
+                        <p class="text-error text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-wrap justify-end gap-3 pt-4 border-t border-base-300">
+
+                    <a href="{% url 'inventory:detail' item.pk %}"
+                       class="btn btn-ghost">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn {% if is_stock_in %}btn-success{% else %}btn-error{% endif %}">
+                        {% if is_stock_in %}
+                            Confirm Stock-In
+                        {% else %}
+                            Confirm Stock-Out
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

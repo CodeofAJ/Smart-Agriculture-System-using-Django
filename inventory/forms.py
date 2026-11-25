@@ -1,6 +1,8 @@
 
 from django import forms
 from .models import Inventory
+from django.utils import timezone
+from .models import InventoryTransaction
 
 
 class InventoryForm(forms.ModelForm):
@@ -123,3 +125,58 @@ class InventoryForm(forms.ModelForm):
                 )
 
         return unit
+
+
+
+
+
+class InventoryTransactionForm(forms.ModelForm):
+
+    class Meta:
+        model = InventoryTransaction
+        fields = [
+            'quantity',
+            'transaction_date',
+            'reference',
+            'notes',
+        ]
+
+        widgets = {
+            'quantity': forms.NumberInput(attrs={
+                'class': 'input input-bordered w-full',
+                'placeholder': 'Enter quantity',
+                'step': '0.01',
+                'min': '0.01',
+            }),
+
+            'transaction_date': forms.DateInput(attrs={
+                'class': 'input input-bordered w-full',
+                'type': 'date',
+            }),
+
+            'reference': forms.TextInput(attrs={
+                'class': 'input input-bordered w-full',
+                'placeholder': 'Invoice or reference number',
+            }),
+
+            'notes': forms.Textarea(attrs={
+                'class': 'textarea textarea-bordered w-full',
+                'rows': 4,
+                'placeholder': 'Enter transaction notes...',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['transaction_date'].initial = timezone.localdate()
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+
+        if quantity is not None and quantity <= 0:
+            raise forms.ValidationError(
+                'Transaction quantity must be greater than zero.'
+            )
+
+        return quantity

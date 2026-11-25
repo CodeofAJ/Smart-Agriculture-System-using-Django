@@ -1,0 +1,829 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Smart Agriculture{% endblock %}
+
+{% block page_heading %}
+    Farm Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Welcome Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">
+                Farm Overview
+            </h1>
+            <p class="text-sm text-base-content/60 mt-1">
+                Monitor your farm operations and performance.
+            </p>
+        </div>
+
+        <div class="text-sm text-base-content/60">
+            {{ today|date:"l, d F Y" }}
+        </div>
+    </div>
+
+
+    <!-- Dashboard Period Filter -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body p-4">
+
+            <form method="get"
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+                <div>
+                    <h2 class="font-semibold">Dashboard Period</h2>
+                    <p class="text-xs text-base-content/60">
+                        Select a period to update financial summaries and charts.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2">
+
+                    <select name="period"
+                            class="select select-bordered select-sm w-full sm:w-44"
+                            onchange="this.form.submit()">
+
+                        <option value="this_month"
+                            {% if selected_period == 'this_month' %}selected{% endif %}>
+                            This Month
+                        </option>
+
+                        <option value="this_year"
+                            {% if selected_period == 'this_year' %}selected{% endif %}>
+                            This Year
+                        </option>
+
+                        <option value="all_time"
+                            {% if selected_period == 'all_time' %}selected{% endif %}>
+                            All Time
+                        </option>
+
+                    </select>
+
+                    <noscript>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            Apply
+                        </button>
+                    </noscript>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+        <div class="stat bg-base-100 shadow-sm rounded-box border border-base-200">
+            <div class="stat-figure text-success">
+                <i class="fa-solid fa-map-location-dot text-2xl"></i>
+            </div>
+            <div class="stat-title">Total Fields</div>
+            <div class="stat-value text-success">{{ total_fields }}</div>
+            <div class="stat-desc">Registered farm fields</div>
+        </div>
+
+        <div class="stat bg-base-100 shadow-sm rounded-box border border-base-200">
+            <div class="stat-figure text-success">
+                <i class="fa-solid fa-seedling text-2xl"></i>
+            </div>
+            <div class="stat-title">Total Crops</div>
+            <div class="stat-value text-success">{{ total_crops }}</div>
+            <div class="stat-desc">{{ growing_crops }} currently growing</div>
+        </div>
+
+        <div class="stat bg-base-100 shadow-sm rounded-box border border-base-200">
+            <div class="stat-figure text-warning">
+                <i class="fa-solid fa-boxes-stacked text-2xl"></i>
+            </div>
+            <div class="stat-title">Inventory Items</div>
+            <div class="stat-value text-warning">{{ total_inventory_items }}</div>
+            <div class="stat-desc">{{ low_stock_count }} low-stock items</div>
+        </div>
+
+        <div class="stat bg-base-100 shadow-sm rounded-box border border-base-200">
+            <div class="stat-figure text-info">
+                <i class="fa-solid fa-tractor text-2xl"></i>
+            </div>
+            <div class="stat-title">Farm Activities</div>
+            <div class="stat-value text-info">{{ total_activities }}</div>
+            <div class="stat-desc">{{ today_activities }} activities today</div>
+        </div>
+
+    </div>
+
+    <!-- Crop and Financial Overview -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h2 class="card-title text-lg">Crop Overview</h2>
+
+                <div class="space-y-4 mt-3">
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Growing</span>
+                            <span class="font-semibold">{{ growing_crops }}</span>
+                        </div>
+                        <progress
+                            class="progress progress-success w-full"
+                            value="{{ growing_crops }}"
+                            max="{{ total_crops|default:1 }}">
+                        </progress>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Planned</span>
+                            <span class="font-semibold">{{ planned_crops }}</span>
+                        </div>
+                        <progress
+                            class="progress progress-info w-full"
+                            value="{{ planned_crops }}"
+                            max="{{ total_crops|default:1 }}">
+                        </progress>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Harvested</span>
+                            <span class="font-semibold">{{ harvested_crops }}</span>
+                        </div>
+                        <progress
+                            class="progress progress-warning w-full"
+                            value="{{ harvested_crops }}"
+                            max="{{ total_crops|default:1 }}">
+                        </progress>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Crop Distribution Chart -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+
+                <div>
+                    <h2 class="card-title text-lg">
+                        Crop Distribution
+                    </h2>
+                    <p class="text-sm text-base-content/60">
+                        Distribution of crops by their current status.
+                    </p>
+                </div>
+
+                <div class="w-full max-w-md mx-auto h-72 mt-4">
+                    <canvas id="cropDistributionChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Monthly Harvest Chart -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+
+                <div>
+                    <h2 class="card-title text-lg">
+                        Monthly Harvest
+                    </h2>
+
+                    <p class="text-sm text-base-content/60">
+                        Monthly harvest quantities for {{ today|date:"Y" }}.
+                    </p>
+                </div>
+
+                <div class="w-full h-80 mt-4">
+                    <canvas id="monthlyHarvestChart"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h2 class="card-title text-lg">Financial Overview</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+
+                    <div class="bg-success/10 rounded-box p-4">
+                        <p class="text-sm text-base-content/60">Harvest Revenue</p>
+                        <h3 class="text-2xl font-bold text-success mt-2">
+                            ₹{{ total_harvest_revenue|floatformat:2 }}
+                        </h3>
+                    </div>
+
+                    <div class="bg-error/10 rounded-box p-4">
+                        <p class="text-sm text-base-content/60">Total Expenses</p>
+                        <h3 class="text-2xl font-bold text-error mt-2">
+                            ₹{{ total_expenses|floatformat:2 }}
+                        </h3>
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="flex justify-between text-sm">
+                    <span class="text-base-content/60">Harvest Quantity</span>
+                    <span class="font-semibold">
+                        {{ total_harvest_quantity|floatformat:2 }}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Net Farm Profit -->
+    <div class="mt-4 p-5 rounded-box
+        {% if net_profit >= 0 %}
+            bg-success/10
+        {% else %}
+            bg-error/10
+        {% endif %}">
+
+        <div class="flex items-center justify-between gap-3">
+
+            <div>
+                <p class="text-sm text-base-content/60">
+                    Net Farm Profit
+                </p>
+
+                <h3 class="text-3xl font-bold mt-2
+                    {% if net_profit >= 0 %}
+                        text-success
+                    {% else %}
+                        text-error
+                    {% endif %}">
+                    ₹{{ net_profit|floatformat:2 }}
+                </h3>
+
+                <p class="text-xs text-base-content/60 mt-2">
+                    Harvest Revenue − Total Expenses
+                </p>
+            </div>
+
+            <div class="text-3xl
+                {% if net_profit >= 0 %}
+                    text-success
+                {% else %}
+                    text-error
+                {% endif %}">
+                {% if net_profit >= 0 %}
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                {% else %}
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- Monthly Expenses Chart -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body">
+
+            <div>
+                <h2 class="card-title text-lg">
+                    Monthly Farm Expenses
+                </h2>
+
+                <p class="text-sm text-base-content/60">
+                    Monthly expense trends for {{ today|date:"Y" }}.
+                </p>
+            </div>
+
+            <div class="w-full h-80 mt-4">
+                <canvas id="monthlyExpensesChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+ 
+
+    <!-- Monthly Inventory Movement Chart -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body">
+
+            <div>
+                <h2 class="card-title text-lg">
+                    Monthly Inventory Movement
+                </h2>
+
+                <p class="text-sm text-base-content/60">
+                    Monthly stock-in and stock-out quantities for {{ today|date:"Y" }}.
+                </p>
+            </div>
+
+            <div class="w-full h-80 mt-4">
+                <canvas id="inventoryMovementChart"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Inventory Section -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+        <!-- Low Stock -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+
+                <div class="flex justify-between items-center">
+                    <h2 class="card-title text-lg">Low Stock Alerts</h2>
+                    <a href="{% url 'inventory:list' %}"
+                       class="link link-success text-sm">
+                        View Inventory
+                    </a>
+                </div>
+
+                {% for item in low_stock_items %}
+                    <div class="flex justify-between items-center py-3 border-b border-base-200 last:border-0">
+                        <div>
+                            <p class="font-semibold">{{ item.name }}</p>
+                            <p class="text-xs text-base-content/60">
+                                Minimum: {{ item.minimum_quantity }} {{ item.unit }}
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="badge badge-warning">
+                                {{ item.quantity }} {{ item.unit }}
+                            </span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-8 text-success">
+                        <i class="fa-solid fa-circle-check text-3xl mb-2"></i>
+                        <p>All inventory items have sufficient stock.</p>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <!-- Inventory Transactions -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+
+                <div class="flex justify-between items-center">
+                    <h2 class="card-title text-lg">Recent Stock Transactions</h2>
+                    <a href="{% url 'inventory:transactions' %}"
+                       class="link link-success text-sm">
+                        View All
+                    </a>
+                </div>
+
+                {% for transaction in recent_inventory_transactions %}
+                    <div class="flex justify-between items-center py-3 border-b border-base-200 last:border-0">
+
+                        <div>
+                            <p class="font-semibold">{{ transaction.inventory.name }}</p>
+                            <p class="text-xs text-base-content/60">
+                                {{ transaction.transaction_date|date:"d M Y" }}
+                            </p>
+                        </div>
+
+                        <div class="text-right">
+                            {% if transaction.transaction_type == 'STOCK_IN' %}
+                                <span class="badge badge-success">Stock In</span>
+                                <p class="text-sm font-semibold text-success">
+                                    +{{ transaction.quantity }} {{ transaction.inventory.unit }}
+                                </p>
+                            {% else %}
+                                <span class="badge badge-error">Stock Out</span>
+                                <p class="text-sm font-semibold text-error">
+                                    -{{ transaction.quantity }} {{ transaction.inventory.unit }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% empty %}
+                    <p class="text-center text-base-content/60 py-8">
+                        No inventory transactions recorded yet.
+                    </p>
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="card bg-base-100 shadow-sm border border-base-200">
+        <div class="card-body">
+
+            <div class="flex justify-between items-center">
+                <h2 class="card-title text-lg">Recent Farm Activities</h2>
+                <a href="{% url 'activities:list' %}"
+                   class="link link-success text-sm">
+                    View All
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Crop</th>
+                            <th>Field</th>
+                            <th>Date</th>
+                            <th>Cost</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for activity in recent_activities %}
+                            <tr>
+                                <td>{{ activity.get_activity_type_display }}</td>
+                                <td>{{ activity.crop.name }}</td>
+                                <td>{{ activity.crop.field.name }}</td>
+                                <td>{{ activity.activity_date|date:"d M Y" }}</td>
+                                <td>₹{{ activity.cost|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-8">
+                                    No farm activities recorded yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ crop_chart_labels|json_script:"crop-chart-labels" }}
+{{ crop_chart_data|json_script:"crop-chart-data" }}
+
+<script>
+    const cropLabels = JSON.parse(
+        document.getElementById('crop-chart-labels').textContent
+    );
+
+    const cropData = JSON.parse(
+        document.getElementById('crop-chart-data').textContent
+    );
+
+    const cropChartElement = document.getElementById(
+        'cropDistributionChart'
+    );
+
+    if (cropChartElement) {
+        new Chart(cropChartElement, {
+            type: 'doughnut',
+
+            data: {
+                labels: cropLabels,
+
+                datasets: [{
+                    data: cropData,
+
+                    backgroundColor: [
+                        '#16a34a',
+                        '#0ea5e9',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 8
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' +
+                                    context.parsed + ' crops';
+                            }
+                        }
+                    }
+                },
+
+                cutout: '65%'
+            }
+        });
+    }
+
+    
+</script>
+
+
+{{ harvest_chart_labels|json_script:"harvest-chart-labels" }}
+{{ harvest_chart_datasets|json_script:"harvest-chart-datasets" }}
+
+<script>
+    const harvestLabels = JSON.parse(
+        document.getElementById('harvest-chart-labels').textContent
+    );
+
+    const harvestDatasets = JSON.parse(
+        document.getElementById('harvest-chart-datasets').textContent
+    );
+
+    const harvestColors = [
+        '#16a34a',
+        '#0ea5e9',
+        '#f59e0b',
+        '#ef4444',
+        '#8b5cf6',
+        '#14b8a6'
+    ];
+
+    const harvestChartElement = document.getElementById(
+        'monthlyHarvestChart'
+    );
+
+    if (harvestChartElement) {
+        new Chart(harvestChartElement, {
+            type: 'bar',
+
+            data: {
+                labels: harvestLabels,
+
+                datasets: harvestDatasets.map((dataset, index) => ({
+                    label: dataset.label,
+                    data: dataset.data,
+                    backgroundColor: harvestColors[
+                        index % harvestColors.length
+                    ],
+                    borderRadius: 6,
+                    maxBarThickness: 45
+                }))
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' +
+                                    context.parsed.y;
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: 'Harvest Quantity'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+
+{{ expense_chart_labels|json_script:"expense-chart-labels" }}
+{{ expense_chart_data|json_script:"expense-chart-data" }}
+
+<script>
+    const expenseLabels = JSON.parse(
+        document.getElementById('expense-chart-labels').textContent
+    );
+
+    const expenseData = JSON.parse(
+        document.getElementById('expense-chart-data').textContent
+    );
+
+    const expenseChartElement = document.getElementById(
+        'monthlyExpensesChart'
+    );
+
+    if (expenseChartElement) {
+        new Chart(expenseChartElement, {
+            type: 'line',
+
+            data: {
+                labels: expenseLabels,
+
+                datasets: [{
+                    label: 'Monthly Expenses',
+                    data: expenseData,
+
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.12)',
+
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#16a34a',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Expenses: ₹' +
+                                    context.parsed.y.toLocaleString('en-IN', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2
+                                    });
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: 'Expenses (₹)'
+                        },
+
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + Number(value).toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+
+{{ inventory_chart_labels|json_script:"inventory-chart-labels" }}
+{{ inventory_chart_datasets|json_script:"inventory-chart-datasets" }}
+
+<script>
+    const inventoryLabels = JSON.parse(
+        document.getElementById('inventory-chart-labels').textContent
+    );
+
+    const inventoryDatasets = JSON.parse(
+        document.getElementById('inventory-chart-datasets').textContent
+    );
+
+    const inventoryChartElement = document.getElementById(
+        'inventoryMovementChart'
+    );
+
+    if (inventoryChartElement) {
+        new Chart(inventoryChartElement, {
+            type: 'bar',
+
+            data: {
+                labels: inventoryLabels,
+
+                datasets: inventoryDatasets.map(dataset => ({
+                    label: dataset.label,
+                    data: dataset.data,
+
+                    backgroundColor:
+                        dataset.transaction_type === 'STOCK_IN'
+                            ? '#16a34a'
+                            : '#f59e0b',
+
+                    borderRadius: 5,
+                    maxBarThickness: 35
+                }))
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' +
+                                    context.parsed.y.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    x: {
+                        stacked: false,
+                        grid: {
+                            display: false
+                        }
+                    },
+
+                    y: {
+                        beginAtZero: true,
+                        stacked: false,
+
+                        title: {
+                            display: true,
+                            text: 'Quantity'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+
+
+
+{% endblock %}
+
+{% endblock %}
