@@ -14,4 +14,6 @@ urlpatterns = [
 
     # HArvest 
     path('farm-records/', include('farm_records.urls')),
+
+    
 ]
