@@ -11,4 +11,7 @@ urlpatterns = [
     path("fields/", include("fields.urls")),
     path("activities/", include("activities.urls")),
     path('inventory/', include('inventory.urls')),
+
+    # HArvest 
+    path('farm-records/', include('farm_records.urls')),
 ]

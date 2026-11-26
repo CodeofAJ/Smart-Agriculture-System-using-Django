@@ -1,0 +1,289 @@
+
+{% extends "base.html" %}
+
+{% block title %}Harvest Records | Smart Agriculture{% endblock %}
+
+{% block page_heading %}Harvest Management{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Harvest Records</h1>
+            <p class="text-sm text-base-content/60 mt-1">
+                Monitor and manage your farm harvest records.
+            </p>
+        </div>
+
+        <a href="{% url 'farm_records:harvest_add' %}"
+           class="btn btn-success">
+            <span class="text-lg">+</span>
+            Add Harvest
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">
+                    Total Harvest Records
+                </p>
+                <h2 class="text-3xl font-bold text-success">
+                    {{ total_records }}
+                </h2>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">
+                    Total Harvest Quantity
+                </p>
+                <h2 class="text-3xl font-bold">
+                    {{ total_quantity|default:0|floatformat:2 }}
+                </h2>
+                <p class="text-xs text-base-content/50">
+                    Combined quantities across measurement units
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body">
+
+            <form method="get"
+                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+                <input
+                    type="search"
+                    name="search"
+                    value="{{ search_query }}"
+                    placeholder="Search crop or notes..."
+                    class="input input-bordered w-full"
+                >
+
+                <select name="crop"
+                        class="select select-bordered w-full">
+                    <option value="">All Crops</option>
+
+                    {% for crop_item in crops %}
+                        <option value="{{ crop_item.crop_id }}"
+                            {% if selected_crop == crop_item.crop_id|stringformat:"s" %}selected{% endif %}>
+                            {{ crop_item.crop__name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="quality"
+                        class="select select-bordered w-full">
+                    <option value="">All Qualities</option>
+
+                    {% for value, label in quality_choices %}
+                        <option value="{{ value }}"
+                            {% if selected_quality == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <div class="flex gap-2">
+                    <button type="submit"
+                            class="btn btn-success flex-1">
+                        Filter
+                    </button>
+
+                    <a href="{% url 'farm_records:harvest_list' %}"
+                       class="btn btn-ghost">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Harvest Table -->
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+        <div class="card-body p-0">
+
+            <div class="p-5 border-b border-base-200">
+                <h2 class="font-semibold text-lg">
+                    Harvest History
+                </h2>
+                <p class="text-sm text-base-content/60">
+                    {{ total_records }} matching records
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="table table-zebra">
+
+                    <thead>
+                        <tr>
+                            <th>Crop</th>
+                            <th>Field</th>
+                            <th>Harvest Date</th>
+                            <th>Quantity</th>
+                            <th>Quality</th>
+                            <th>Selling Price</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for harvest in harvests %}
+
+                        <tr>
+                            <td>
+                                <div class="font-semibold">
+                                    {{ harvest.crop.name }}
+                                </div>
+                                <div class="text-xs text-base-content/50">
+                                    {{ harvest.crop.variety|default:"-" }}
+                                </div>
+                            </td>
+
+                            <td>{{ harvest.crop.field.name }}</td>
+
+                            <td>{{ harvest.harvest_date|date:"d M Y" }}</td>
+
+                            <td>
+                                {{ harvest.quantity|floatformat:2 }}
+                                {{ harvest.unit }}
+                            </td>
+
+                            <td>
+                                {% if harvest.quality == "EXCELLENT" %}
+                                    <span class="badge badge-success">
+                                        Excellent
+                                    </span>
+                                {% elif harvest.quality == "GOOD" %}
+                                    <span class="badge badge-info">
+                                        Good
+                                    </span>
+                                {% elif harvest.quality == "AVERAGE" %}
+                                    <span class="badge badge-warning">
+                                        Average
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-error">
+                                        Poor
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                ₹{{ harvest.selling_price|floatformat:2 }}
+                            </td>
+
+                            <td>
+                                <div class="flex justify-end gap-1">
+
+                                    <a href="{% url 'farm_records:harvest_detail' harvest.pk %}"
+                                       class="btn btn-ghost btn-xs"
+                                       title="View">
+                                        View
+                                    </a>
+
+                                    <a href="{% url 'farm_records:harvest_edit' harvest.pk %}"
+                                       class="btn btn-ghost btn-xs text-success"
+                                       title="Edit">
+                                        Edit
+                                    </a>
+
+                                    <a href="{% url 'farm_records:harvest_delete' harvest.pk %}"
+                                       class="btn btn-ghost btn-xs text-error"
+                                       title="Delete">
+                                        Delete
+                                    </a>
+
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="7" class="text-center py-12">
+
+                                <div class="text-base-content/40 text-4xl mb-3">
+                                    🌾
+                                </div>
+
+                                <p class="font-semibold">
+                                    No harvest records found
+                                </p>
+
+                                <p class="text-sm text-base-content/60 mt-1">
+                                    Add a harvest record or adjust your filters.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-5 border-t border-base-200">
+
+                <p class="text-sm text-base-content/60">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </p>
+
+                <div class="join">
+
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1&search={{ search_query|urlencode }}&crop={{ selected_crop }}&quality={{ selected_quality }}"
+                           class="join-item btn btn-sm">
+                            First
+                        </a>
+
+                        <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query|urlencode }}&crop={{ selected_crop }}&quality={{ selected_quality }}"
+                           class="join-item btn btn-sm">
+                            Previous
+                        </a>
+                    {% endif %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&search={{ search_query|urlencode }}&crop={{ selected_crop }}&quality={{ selected_quality }}"
+                           class="join-item btn btn-sm">
+                            Next
+                        </a>
+
+                        <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query|urlencode }}&crop={{ selected_crop }}&quality={{ selected_quality }}"
+                           class="join-item btn btn-sm">
+                            Last
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

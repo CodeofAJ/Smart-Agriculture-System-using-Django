@@ -1,0 +1,125 @@
+
+{% extends "base.html" %}
+
+{% block title %}Delete Harvest | Smart Agriculture{% endblock %}
+
+{% block page_heading %}Delete Harvest{% endblock %}
+
+{% block content %}
+
+<div class="max-w-2xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-bold">Delete Harvest Record</h1>
+        <p class="text-sm text-base-content/60 mt-1">
+            Review the record before confirming deletion.
+        </p>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="card bg-base-100 border border-error/30 shadow-sm">
+
+        <div class="card-body p-6 sm:p-8">
+
+            <div class="flex items-center gap-4">
+
+                <div class="w-14 h-14 rounded-full bg-error/10 flex items-center justify-center">
+                    <span class="text-3xl">⚠️</span>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold">
+                        Are you sure?
+                    </h2>
+                    <p class="text-sm text-base-content/60">
+                        This action cannot be undone.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="alert alert-warning mt-4">
+                Deleting this harvest record will permanently remove it
+                from your farm records.
+            </div>
+
+            <!-- Record Summary -->
+            <div class="bg-base-200/50 rounded-xl p-5 space-y-4 mt-2">
+
+                <h3 class="font-semibold">
+                    Record Information
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Crop</p>
+                        <p class="font-semibold">
+                            {{ harvest.crop.name }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Field</p>
+                        <p class="font-semibold">
+                            {{ harvest.crop.field.name }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Harvest Date</p>
+                        <p class="font-semibold">
+                            {{ harvest.harvest_date|date:"d M Y" }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Quantity</p>
+                        <p class="font-semibold">
+                            {{ harvest.quantity|floatformat:2 }}
+                            {{ harvest.unit }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Quality</p>
+                        <p class="font-semibold">
+                            {{ harvest.get_quality_display }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-base-content/60">Selling Price</p>
+                        <p class="font-semibold">
+                            ₹{{ harvest.selling_price|floatformat:2 }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Delete Form -->
+            <form method="post" class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4">
+
+                {% csrf_token %}
+
+                <a href="{% url 'farm_records:harvest_detail' harvest.pk %}"
+                   class="btn btn-ghost">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn btn-error">
+                    Confirm Delete
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

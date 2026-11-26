@@ -1,0 +1,249 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if object %}
+        Edit Harvest | Smart Agriculture
+    {% else %}
+        Add Harvest | Smart Agriculture
+    {% endif %}
+{% endblock %}
+
+{% block page_heading %}
+    {% if object %}Edit Harvest{% else %}Add Harvest{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+        <div>
+            <h1 class="text-2xl font-bold">
+                {% if object %}
+                    Edit Harvest Record
+                {% else %}
+                    Add New Harvest
+                {% endif %}
+            </h1>
+
+            <p class="text-sm text-base-content/60 mt-1">
+                {% if object %}
+                    Update the details of this harvest record.
+                {% else %}
+                    Record the quantity and quality of your farm harvest.
+                {% endif %}
+            </p>
+        </div>
+
+        <a href="{% url 'farm_records:harvest_list' %}"
+           class="btn btn-ghost btn-sm">
+            ← Back to Harvest Records
+        </a>
+
+    </div>
+
+    <!-- Form Card -->
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+
+        <div class="card-body p-5 sm:p-8">
+
+            <form method="post" class="space-y-6">
+
+                {% csrf_token %}
+
+                <!-- General Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Crop Information -->
+                <div>
+                    <h2 class="font-semibold text-lg">
+                        Crop Information
+                    </h2>
+
+                    <p class="text-xs text-base-content/60 mt-1">
+                        Select the crop associated with this harvest.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <div class="form-control">
+                        <label for="{{ form.crop.id_for_label }}"
+                               class="label">
+                            <span class="label-text font-medium">
+                                Crop <span class="text-error">*</span>
+                            </span>
+                        </label>
+
+                        {{ form.crop }}
+
+                        {% for error in form.crop.errors %}
+                            <p class="text-error text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-control">
+                        <label for="{{ form.harvest_date.id_for_label }}"
+                               class="label">
+                            <span class="label-text font-medium">
+                                Harvest Date <span class="text-error">*</span>
+                            </span>
+                        </label>
+
+                        {{ form.harvest_date }}
+
+                        {% for error in form.harvest_date.errors %}
+                            <p class="text-error text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Harvest Details -->
+                <div>
+                    <h2 class="font-semibold text-lg">
+                        Harvest Details
+                    </h2>
+
+                    <p class="text-xs text-base-content/60 mt-1">
+                        Enter harvested quantity, measurement unit, and quality.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <div class="form-control">
+                        <label for="{{ form.quantity.id_for_label }}"
+                               class="label">
+                            <span class="label-text font-medium">
+                                Quantity <span class="text-error">*</span>
+                            </span>
+                        </label>
+
+                        {{ form.quantity }}
+
+                        {% for error in form.quantity.errors %}
+                            <p class="text-error text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-control">
+                        <label for="{{ form.unit.id_for_label }}"
+                               class="label">
+                            <span class="label-text font-medium">
+                                Measurement Unit <span class="text-error">*</span>
+                            </span>
+                        </label>
+
+                        {{ form.unit }}
+
+                        {% for error in form.unit.errors %}
+                            <p class="text-error text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-control">
+                        <label for="{{ form.quality.id_for_label }}"
+                               class="label">
+                            <span class="label-text font-medium">
+                                Harvest Quality
+                            </span>
+                        </label>
+
+                        {{ form.quality }}
+
+                        {% for error in form.quality.errors %}
+                            <p class="text-error text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Financial Details -->
+                <div>
+                    <h2 class="font-semibold text-lg">
+                        Financial Information
+                    </h2>
+
+                    <p class="text-xs text-base-content/60 mt-1">
+                        Enter the selling price associated with this harvest.
+                    </p>
+                </div>
+
+                <div class="form-control max-w-md">
+                    <label for="{{ form.selling_price.id_for_label }}"
+                           class="label">
+                        <span class="label-text font-medium">
+                            Selling Price (₹)
+                        </span>
+                    </label>
+
+                    {{ form.selling_price }}
+
+                    {% for error in form.selling_price.errors %}
+                        <p class="text-error text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Notes -->
+                <div class="form-control">
+                    <label for="{{ form.notes.id_for_label }}"
+                           class="label">
+                        <span class="label-text font-medium">
+                            Additional Notes
+                        </span>
+                    </label>
+
+                    {{ form.notes }}
+
+                    {% for error in form.notes.errors %}
+                        <p class="text-error text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4">
+
+                    <a href="{% url 'farm_records:harvest_list' %}"
+                       class="btn btn-ghost">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-success">
+
+                        {% if object %}
+                            Update Harvest
+                        {% else %}
+                            Save Harvest
+                        {% endif %}
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
