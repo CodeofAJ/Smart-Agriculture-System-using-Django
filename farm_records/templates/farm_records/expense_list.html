@@ -1,0 +1,231 @@
+
+{% extends "base.html" %}
+
+{% block title %}Expenses | Smart Agriculture{% endblock %}
+
+{% block page_heading %}Expense Management{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Farm Expenses</h1>
+            <p class="text-base-content/60 mt-1">
+                Track and manage your farm expenditure.
+            </p>
+        </div>
+
+        <a href="{% url 'farm_records:expense_add' %}"
+           class="btn btn-primary">
+            <span class="text-lg">+</span>
+            Record Expense
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Total Expenses</p>
+                <h2 class="text-2xl font-bold text-error">
+                    ₹{{ total_expenses|floatformat:2 }}
+                </h2>
+                <p class="text-xs text-base-content/50">
+                    Based on current filters
+                </p>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+                <p class="text-sm text-base-content/60">Expense Records</p>
+                <h2 class="text-2xl font-bold">
+                    {{ total_records }}
+                </h2>
+                <p class="text-xs text-base-content/50">
+                    Matching records
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search_query }}"
+                    placeholder="Search description or crop..."
+                    class="input input-bordered w-full"
+                >
+
+                <select name="expense_type" class="select select-bordered w-full">
+                    <option value="">All Expense Types</option>
+                    {% for value, label in expense_types %}
+                        <option value="{{ value }}"
+                            {% if selected_type == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="crop" class="select select-bordered w-full">
+                    <option value="">All Crops</option>
+                    {% for crop in crops %}
+                        <option value="{{ crop.crop_id }}"
+                            {% if selected_crop == crop.crop_id|stringformat:"s" %}selected{% endif %}>
+                            {{ crop.crop__name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-1">
+                        Search
+                    </button>
+
+                    <a href="{% url 'farm_records:expense_list' %}"
+                       class="btn btn-ghost">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Table -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body p-0">
+
+            <div class="p-5 border-b border-base-300">
+                <h2 class="font-semibold text-lg">Expense Records</h2>
+                <p class="text-sm text-base-content/60">
+                    View and manage recorded farm expenses.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Expense Type</th>
+                            <th>Crop</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td class="whitespace-nowrap">
+                                {{ expense.expense_date|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                <span class="badge badge-outline">
+                                    {{ expense.get_expense_type_display }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if expense.crop %}
+                                    {{ expense.crop.name }}
+                                {% else %}
+                                    <span class="text-base-content/50">General</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="font-semibold text-error whitespace-nowrap">
+                                ₹{{ expense.amount|floatformat:2 }}
+                            </td>
+
+                            <td class="max-w-xs truncate">
+                                {{ expense.description|default:"—" }}
+                            </td>
+
+                            <td>
+                                <div class="flex justify-end gap-1">
+                                    <a href="{% url 'farm_records:expense_detail' expense.pk %}"
+                                       class="btn btn-ghost btn-xs">
+                                        View
+                                    </a>
+
+                                    <a href="{% url 'farm_records:expense_edit' expense.pk %}"
+                                       class="btn btn-ghost btn-xs text-primary">
+                                        Edit
+                                    </a>
+
+                                    <a href="{% url 'farm_records:expense_delete' expense.pk %}"
+                                       class="btn btn-ghost btn-xs text-error">
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-12">
+                                <div class="space-y-2">
+                                    <p class="text-lg font-semibold">
+                                        No expenses found
+                                    </p>
+                                    <p class="text-sm text-base-content/60">
+                                        Record your first farm expense or adjust your filters.
+                                    </p>
+                                    <a href="{% url 'farm_records:expense_add' %}"
+                                       class="btn btn-primary btn-sm mt-2">
+                                        Record Expense
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 p-5 border-t border-base-300">
+
+                <p class="text-sm text-base-content/60">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </p>
+
+                <div class="join">
+
+                    {% if page_obj.has_previous %}
+                        <a href="?search={{ search_query|urlencode }}&expense_type={{ selected_type|urlencode }}&crop={{ selected_crop|urlencode }}&page={{ page_obj.previous_page_number }}"
+                           class="join-item btn btn-sm">
+                            Previous
+                        </a>
+                    {% endif %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?search={{ search_query|urlencode }}&expense_type={{ selected_type|urlencode }}&crop={{ selected_crop|urlencode }}&page={{ page_obj.next_page_number }}"
+                           class="join-item btn btn-sm">
+                            Next
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

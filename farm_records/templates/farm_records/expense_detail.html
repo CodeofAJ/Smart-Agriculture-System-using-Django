@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+
+{% block title %}Expense Details | Smart Agriculture{% endblock %}
+
+{% block page_heading %}Expense Details{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Expense Details</h1>
+            <p class="text-base-content/60 mt-1">
+                Review the details of this farm expense.
+            </p>
+        </div>
+
+        <div class="flex gap-2">
+            <a href="{% url 'farm_records:expense_edit' expense.pk %}"
+               class="btn btn-primary btn-sm">
+                Edit Expense
+            </a>
+
+            <a href="{% url 'farm_records:expense_delete' expense.pk %}"
+               class="btn btn-error btn-outline btn-sm">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <!-- Amount Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+            <p class="text-sm text-base-content/60">Total Expense Amount</p>
+
+            <h2 class="text-3xl font-bold text-error">
+                ₹{{ expense.amount|floatformat:2 }}
+            </h2>
+
+            <div class="mt-2">
+                <span class="badge badge-outline badge-lg">
+                    {{ expense.get_expense_type_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Information -->
+    <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body">
+
+            <h2 class="text-lg font-semibold mb-4">
+                Expense Information
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <div>
+                    <p class="text-sm text-base-content/60">Expense Type</p>
+                    <p class="font-medium mt-1">
+                        {{ expense.get_expense_type_display }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Expense Date</p>
+                    <p class="font-medium mt-1">
+                        {{ expense.expense_date|date:"d M Y" }}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Related Crop</p>
+                    <p class="font-medium mt-1">
+                        {% if expense.crop %}
+                            {{ expense.crop.name }}
+                        {% else %}
+                            General Farm Expense
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div>
+                    <p class="text-sm text-base-content/60">Recorded On</p>
+                    <p class="font-medium mt-1">
+                        {{ expense.created_at|date:"d M Y, h:i A" }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+                <p class="text-sm text-base-content/60 mb-2">
+                    Description
+                </p>
+
+                <div class="bg-base-200 rounded-lg p-4">
+                    {% if expense.description %}
+                        {{ expense.description|linebreaksbr }}
+                    {% else %}
+                        <span class="text-base-content/50">
+                            No description provided.
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div>
+        <a href="{% url 'farm_records:expense_list' %}"
+           class="btn btn-ghost">
+            ← Back to Expenses
+        </a>
+    </div>
+
+</div>
+{% endblock %}
